@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+/*
+ * Paleta oficial da marca Cabelaria Golden.
+ * Fundo quase preto, dourado como acento (não banho), coroa branca.
+ * A marca é intencionalmente escura — não existe versão "modo claro".
+ */
+:root {
+  --cor-fundo: #0b0b0b;
+  --cor-cartao: #151515;
+  --cor-dourado: #c9a227;
+  --cor-dourado-claro: #e8d493;
+  --cor-dourado-escuro: #6e5a28;
+  --cor-champanhe: #f2e6b8;
+  --cor-texto-principal: #f4f1e8;
+  --cor-texto-secundario: #8c8779;
+  --cor-entrada: #5fa772;
+  --cor-alerta: #c25b3a;
+}
+
+@theme inline {
+  --color-fundo: var(--cor-fundo);
+  --color-cartao: var(--cor-cartao);
+  --color-dourado: var(--cor-dourado);
+  --color-dourado-claro: var(--cor-dourado-claro);
+  --color-dourado-escuro: var(--cor-dourado-escuro);
+  --color-champanhe: var(--cor-champanhe);
+  --color-texto-principal: var(--cor-texto-principal);
+  --color-texto-secundario: var(--cor-texto-secundario);
+  --color-entrada: var(--cor-entrada);
+  --color-alerta: var(--cor-alerta);
+
+  --font-titulo: var(--font-titulo);
+  --font-corpo: var(--font-corpo);
+}
+
+body {
+  background: var(--cor-fundo);
+  color: var(--cor-texto-principal);
+  font-family: var(--font-corpo), Arial, Helvetica, sans-serif;
+}
+
+/* Título em serifa maiúscula com espaçamento entre letras, como a logo. */
+.titulo-marca {
+  font-family: var(--font-titulo), Georgia, serif;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Divisória/barra de destaque com o degradê metálico da marca. */
+.divisoria-metalica {
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--cor-dourado-escuro),
+    var(--cor-dourado-claro),
+    #b8973f,
+    var(--cor-champanhe),
+    var(--cor-dourado-escuro)
+  );
+}
+
+/* Respeita quem pediu menos animação no sistema operacional. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

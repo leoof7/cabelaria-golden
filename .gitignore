@@ -1,0 +1,19 @@
+# segredos — nunca comitar
+.env
+.env.local
+.env.*.local
+
+# dependências
+node_modules
+
+# build do Next.js
+.next
+out
+
+# diversos
+.DS_Store
+*.log
+npm-debug.log*
+.vercel
+next-env.d.ts
+*.tsbuildinfo
