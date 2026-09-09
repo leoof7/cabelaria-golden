@@ -8,12 +8,21 @@ import { createClient } from "@supabase/supabase-js";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
+// Não pode ser um "throw" aqui: como o site é exportado estático (sem
+// servidor), o Next roda esse arquivo também durante o build, mesmo que
+// nenhuma tela chame o banco de verdade nesse momento. Um throw derrubaria
+// o build inteiro. Por isso: aviso no console, e placeholder que só falha
+// quando alguém de fato tentar usar o banco pelo navegador.
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
+  console.warn(
     "Faltam as variáveis NEXT_PUBLIC_SUPABASE_URL e/ou " +
       "NEXT_PUBLIC_SUPABASE_ANON_KEY. Copie .env.example para .env.local " +
-      "e preencha com os dados do projeto Supabase.",
+      "e preencha com os dados do projeto Supabase — sem isso, nada que " +
+      "acessa o banco vai funcionar.",
   );
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(
+  supabaseUrl || "https://placeholder.supabase.co",
+  supabaseAnonKey || "placeholder",
+);

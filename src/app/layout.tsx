@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Playfair_Display } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/lib/auth-provider";
 
 // Corpo do texto: sem-serifa grossa, pedida na identidade visual.
 const geistSans = Geist({
@@ -26,7 +27,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${playfairDisplay.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-fundo text-texto-principal">
-        {children}
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );
