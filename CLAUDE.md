@@ -64,12 +64,17 @@ Tabelas: `tenant`, `profissional`, `perfil` (login/papel de cada pessoa),
 
 ## Login e permissões
 
-Login individual por profissional (Supabase Auth, e-mail/senha,
-client-side — compatível com a Fase 1 sem servidor). Dono vê e mexe em
-tudo, inclusive caixa. Profissional vê e mexe só na própria agenda/fila/
-atendimento — **nunca** vê o caixa nem o fechamento financeiro do salão.
-Detalhe de como a conta nasce "pendente" até o dono vincular a uma cadeira:
-ver `ESCOPO.md` (seção "Login e permissões") e os comentários em
+Login individual (Supabase Auth, e-mail/senha, client-side — compatível com
+a Fase 1 sem servidor). Três papéis, pedidos pelo próprio Leo:
+
+- **Dono**: vê e mexe em tudo, inclusive caixa.
+- **Recepção**: vê e mexe na agenda e fila de **todos** os profissionais,
+  mas **nunca** vê caixa nem atendimento (financeiro).
+- **Profissional**: vê e mexe só na própria agenda/fila/atendimento —
+  **nunca** vê o caixa nem o financeiro de ninguém.
+
+Detalhe de como a conta nasce "pendente" até o dono vincular a uma cadeira
+ou papel: ver `ESCOPO.md` (seção "Login e permissões") e os comentários em
 `supabase/schema.sql`.
 
 ## Forma de trabalhar

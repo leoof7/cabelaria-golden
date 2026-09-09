@@ -43,7 +43,9 @@ de confirmar antes de ir para produção.
 - [ ] Qual plano do Salon Soft ele paga hoje. **Respondido:** plano
       Avançado, R$ 69,90/mês (ver item de alta prioridade acima sobre quais
       funções ele realmente usa).
-- [ ] O que roda o robô de WhatsApp atual.
+- [ ] O que roda o robô de WhatsApp atual. **Parcial:** é um robô de menu com
+      4 perguntas, pago à parte (fora do Salon Soft). Falta saber a
+      ferramenta/plataforma exata, caso um dia a gente precise substituir.
 - [ ] Ele já paga Meta Verified?
 
 ## Confirmado — fora do escopo (não perguntar de novo)

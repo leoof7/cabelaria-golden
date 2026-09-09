@@ -66,8 +66,11 @@ vira só um cálculo em cima do que já existe — sem refazer nada.
 - Conta nova nasce **pendente**: só existe login, sem cadeira e sem papel
   definido. O dono vincula essa conta a uma cadeira (ou marca como dono)
   numa tela de usuários.
-- **Dono**: vê e mexe em tudo — agenda de todos, caixa, fechamento do dia,
-  comissão.
+- **Dono** ("gestão"): vê e mexe em tudo — agenda de todos, caixa,
+  fechamento do dia, comissão.
+- **Recepção** (pedido pelo Leo): vê e mexe na agenda e na fila de **todos**
+  os profissionais — pode marcar/organizar horário de qualquer cadeira.
+  **Não tem acesso a caixa nem a atendimento** (financeiro).
 - **Profissional**: vê e mexe só na própria agenda, fila e atendimentos.
   **Não vê o caixa nem o fechamento financeiro do salão** — só registra o
   próprio atendimento (valor cobrado/pago daquele cliente).
@@ -180,3 +183,15 @@ abrir no celular pela rede wi-fi vai junto com o aviso.
 - Mensagens prontas (tabela `modelo_mensagem`) + botão que abre o WhatsApp
   com o texto preenchido (link `wa.me`), sem integração paga. Funciona
   igual em navegador de computador e de celular.
+
+### ADR-003 — Terceiro papel de acesso: recepção (2026-09-09)
+
+- Pedido direto do Leo (print de conversa no WhatsApp): além de dono e
+  profissional, precisa de um acesso de **recepção** — vê a agenda de
+  todos os profissionais para organizar horário de qualquer cadeira, mas
+  sem acesso a financeiro (caixa, atendimento).
+- Implementado em `supabase/schema.sql`: `perfil.papel` agora aceita
+  `'dono' | 'recepcao' | 'profissional'`, com função auxiliar
+  `eh_recepcao()` e policies de `agendamento`/`fila` liberando leitura e
+  escrita para esse papel, mantendo `atendimento`/`lancamento` fechados
+  para ele.

@@ -80,11 +80,12 @@ create table public.perfil (
   tenant_id        uuid not null references public.tenant (id),
   profissional_id  uuid references public.profissional (id),
   papel            text not null default 'profissional'
-                     check (papel in ('dono', 'profissional')),
+                     check (papel in ('dono', 'recepcao', 'profissional')),
   criado_em        timestamptz not null default now(),
 
-  constraint dono_sem_cadeira
-    check (papel <> 'dono' or profissional_id is null)
+  -- dono e recepção não ocupam cadeira — só profissional tem profissional_id
+  constraint gestao_sem_cadeira
+    check (papel not in ('dono', 'recepcao') or profissional_id is null)
 );
 
 -- Funções auxiliares para as policies de RLS das outras tabelas.
@@ -120,6 +121,20 @@ set search_path = public
 as $$
   select exists (
     select 1 from public.perfil where id = auth.uid() and papel = 'dono'
+  )
+$$;
+
+-- Recepção: vê a agenda de todos os profissionais (pra organizar horário de
+-- qualquer cadeira), mas não tem acesso a caixa nem a atendimento (dinheiro).
+create or replace function public.eh_recepcao()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.perfil where id = auth.uid() and papel = 'recepcao'
   )
 $$;
 
@@ -326,6 +341,9 @@ create table public.mensagem_enviada (
 --   profissional (logado):
 --     - vê e mexe na própria agenda, fila e atendimentos
 --     - NÃO vê o caixa (lancamento) nem atendimento de outro profissional
+--   recepcao (logado):
+--     - vê e mexe na agenda e na fila de TODOS os profissionais
+--     - NÃO vê caixa nem atendimento (financeiro) de ninguém
 --   dono (logado):
 --     - vê e mexe em tudo dentro do próprio tenant
 
@@ -453,7 +471,11 @@ create policy "agendamento_select_equipe" on public.agendamento
   for select to authenticated
   using (
     tenant_id = public.meu_tenant_id()
-    and (public.eh_dono() or profissional_id = public.meu_profissional_id())
+    and (
+      public.eh_dono()
+      or public.eh_recepcao()
+      or profissional_id = public.meu_profissional_id()
+    )
   );
 
 create policy "agendamento_insere_publico" on public.agendamento
@@ -468,14 +490,22 @@ create policy "agendamento_insere_equipe" on public.agendamento
   for insert to authenticated
   with check (
     tenant_id = public.meu_tenant_id()
-    and (public.eh_dono() or profissional_id = public.meu_profissional_id())
+    and (
+      public.eh_dono()
+      or public.eh_recepcao()
+      or profissional_id = public.meu_profissional_id()
+    )
   );
 
 create policy "agendamento_atualiza_equipe" on public.agendamento
   for update to authenticated
   using (
     tenant_id = public.meu_tenant_id()
-    and (public.eh_dono() or profissional_id = public.meu_profissional_id())
+    and (
+      public.eh_dono()
+      or public.eh_recepcao()
+      or profissional_id = public.meu_profissional_id()
+    )
   );
 
 create policy "agendamento_apaga_dono" on public.agendamento
@@ -547,7 +577,12 @@ create policy "fila_select_equipe" on public.fila
   for select to authenticated
   using (
     tenant_id = public.meu_tenant_id()
-    and (public.eh_dono() or profissional_id = public.meu_profissional_id() or profissional_id is null)
+    and (
+      public.eh_dono()
+      or public.eh_recepcao()
+      or profissional_id = public.meu_profissional_id()
+      or profissional_id is null
+    )
   );
 
 create policy "fila_insere_publico" on public.fila
@@ -562,7 +597,12 @@ create policy "fila_atualiza_equipe" on public.fila
   for update to authenticated
   using (
     tenant_id = public.meu_tenant_id()
-    and (public.eh_dono() or profissional_id = public.meu_profissional_id() or profissional_id is null)
+    and (
+      public.eh_dono()
+      or public.eh_recepcao()
+      or profissional_id = public.meu_profissional_id()
+      or profissional_id is null
+    )
   );
 
 create policy "fila_apaga_dono" on public.fila
