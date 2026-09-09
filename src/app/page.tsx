@@ -52,6 +52,9 @@ export default function Home() {
         <CartaoAtalho href="/profissionais" titulo="Profissionais" />
         <CartaoAtalho href="/servicos" titulo="Serviços" />
         <CartaoAtalho href="/clientes" titulo="Clientes" />
+        {perfil.papel === "dono" && (
+          <CartaoAtalho href="/usuarios" titulo="Acessos da equipe" />
+        )}
       </nav>
 
       <div className="mt-auto pt-6">
