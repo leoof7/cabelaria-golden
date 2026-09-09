@@ -111,13 +111,13 @@ antes de construir.
 8. Página pública
 9. Comissão
 
-Status atual: **itens 1 a 4 construídos** — login individual, tela de
-acessos da equipe, profissionais, serviços, clientes, agenda do dia (em
-colunas, por profissional), novo agendamento (com grade de horário livre) e
-fechar atendimento (grava valor cobrado/pago e já lança no caixa).
-Repositório publicado em https://github.com/leoof7/cabelaria-golden. Ainda
-**não testado com banco de dados real** (falta o projeto Supabase — ver
-`PENDENCIAS.md`). Em andamento: **item 5, caixa**.
+Status atual: **itens 1 a 6 construídos** — login individual, acessos da
+equipe, profissionais, serviços, clientes, agenda do dia, novo agendamento,
+fechar atendimento, caixa (entradas/saídas do dia) e fechamento do dia
+(total por forma de pagamento e por profissional). Repositório publicado em
+https://github.com/leoof7/cabelaria-golden. Ainda **não testado com banco
+de dados real** (falta o projeto Supabase — ver `PENDENCIAS.md`). Em
+andamento: **item 7, fila de espera**.
 
 ## Serviços reais (extraídos do Salon Soft do cliente)
 

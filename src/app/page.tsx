@@ -50,11 +50,16 @@ export default function Home() {
 
       <nav className="grid grid-cols-1 gap-3">
         <CartaoAtalho href="/agenda" titulo="Agenda do dia" />
+        <CartaoAtalho href="/fila" titulo="Fila de espera" />
         <CartaoAtalho href="/profissionais" titulo="Profissionais" />
         <CartaoAtalho href="/servicos" titulo="Serviços" />
         <CartaoAtalho href="/clientes" titulo="Clientes" />
         {perfil.papel === "dono" && (
-          <CartaoAtalho href="/usuarios" titulo="Acessos da equipe" />
+          <>
+            <CartaoAtalho href="/caixa" titulo="Caixa" />
+            <CartaoAtalho href="/fechamento" titulo="Fechamento do dia" />
+            <CartaoAtalho href="/usuarios" titulo="Acessos da equipe" />
+          </>
         )}
       </nav>
 
