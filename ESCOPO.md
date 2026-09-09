@@ -111,8 +111,12 @@ antes de construir.
 8. Página pública
 9. Comissão
 
-Status atual: **fundação do projeto** (antes do item 1) — schema do banco,
-config do Next.js/Tailwind/Supabase. Nenhuma tela construída ainda.
+Status atual: **item 1 concluído** (listas base) — login individual, tela
+de acessos da equipe (dono vincula login a papel/cadeira), profissionais,
+serviços e clientes. Repositório publicado em
+https://github.com/leoof7/cabelaria-golden. Ainda não testado com banco de
+dados real (falta o projeto Supabase — ver `PENDENCIAS.md`). Em andamento:
+**item 2, agenda do dia**.
 
 ## Serviços reais (extraídos do Salon Soft do cliente)
 

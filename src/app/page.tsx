@@ -49,6 +49,7 @@ export default function Home() {
       <div className="divisoria-metalica" />
 
       <nav className="grid grid-cols-1 gap-3">
+        <CartaoAtalho href="/agenda" titulo="Agenda do dia" />
         <CartaoAtalho href="/profissionais" titulo="Profissionais" />
         <CartaoAtalho href="/servicos" titulo="Serviços" />
         <CartaoAtalho href="/clientes" titulo="Clientes" />
