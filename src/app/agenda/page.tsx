@@ -104,11 +104,19 @@ export default function PaginaAgenda() {
 
   return (
     <div className="flex flex-1 flex-col gap-4 px-4 py-6 sm:px-6">
-      <div>
-        <Link href="/" className="text-sm text-texto-secundario">
-          ← Voltar
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <Link href="/" className="text-sm text-texto-secundario">
+            ← Voltar
+          </Link>
+          <h1 className="titulo-marca text-2xl text-dourado">Agenda do dia</h1>
+        </div>
+        <Link
+          href={`/agendamento/novo?data=${data}`}
+          className="whitespace-nowrap rounded-lg bg-dourado px-4 py-2 text-sm font-bold text-fundo"
+        >
+          + Agendar
         </Link>
-        <h1 className="titulo-marca text-2xl text-dourado">Agenda do dia</h1>
       </div>
 
       <div className="flex items-center justify-between gap-3 rounded-xl bg-cartao px-4 py-3">

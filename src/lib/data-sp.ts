@@ -62,3 +62,13 @@ export function minutosDoHorario(horaTexto: string): number {
   const [h, m] = horaTexto.split(":").map(Number);
   return h * 60 + m;
 }
+
+// Monta um timestamp ISO (com o -03:00 explícito) a partir de uma data
+// (YYYY-MM-DD) e um horário em minutos desde 00:00, os dois já pensados no
+// fuso de São Paulo.
+export function dataEHoraParaISO(dataYMD: string, minutosDoDia: number): string {
+  const h = Math.floor(minutosDoDia / 60);
+  const m = minutosDoDia % 60;
+  const hora = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:00`;
+  return new Date(`${dataYMD}T${hora}-03:00`).toISOString();
+}
