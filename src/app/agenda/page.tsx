@@ -221,21 +221,48 @@ function ColunaProfissional({
             ALTURA_15MIN,
             (a.duracao_minutos / 15) * ALTURA_15MIN,
           );
+          const corFundo =
+            a.status === "concluido"
+              ? "bg-entrada/40"
+              : a.status === "faltou"
+                ? "bg-alerta/40"
+                : "bg-dourado-escuro";
 
-          return (
-            <div
-              key={a.id}
-              className="absolute left-1 right-1 overflow-hidden rounded-md bg-dourado-escuro px-2 py-1 text-xs"
-              style={{ top: topo, height: altura }}
-            >
+          const conteudo = (
+            <>
               <p className="font-bold text-champanhe">
                 {formatarHoraSP(a.data_hora_inicio)} ·{" "}
                 {nomesCliente[a.cliente_id] ?? "Cliente"}
               </p>
               <p className="text-texto-principal/80">
                 {nomesServico[a.servico_id] ?? "Serviço"}
+                {a.status === "concluido" && " · fechado"}
+                {a.status === "faltou" && " · faltou"}
               </p>
-            </div>
+            </>
+          );
+
+          if (a.status !== "agendado") {
+            return (
+              <div
+                key={a.id}
+                className={`absolute left-1 right-1 overflow-hidden rounded-md px-2 py-1 text-xs ${corFundo}`}
+                style={{ top: topo, height: altura }}
+              >
+                {conteudo}
+              </div>
+            );
+          }
+
+          return (
+            <Link
+              key={a.id}
+              href={`/atendimento/fechar?agendamento=${a.id}`}
+              className={`absolute left-1 right-1 overflow-hidden rounded-md px-2 py-1 text-xs outline-none focus-visible:ring-2 focus-visible:ring-dourado ${corFundo}`}
+              style={{ top: topo, height: altura }}
+            >
+              {conteudo}
+            </Link>
           );
         })}
       </div>
