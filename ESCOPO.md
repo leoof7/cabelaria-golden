@@ -153,6 +153,13 @@ possível nesse momento). Achados e corrigidos:
 - Um `data` de volta pra tela errada depois de fechar atendimento — agora
   volta pro dia que a pessoa estava vendo, não sempre "hoje".
 
+### Mensagens prontas — construído (2026-09-09)
+
+Tela `/mensagens` (dono edita os textos) + botão de WhatsApp em dois
+lugares onde faz sentido: depois de criar um agendamento (manda
+confirmação) e na fila de espera (avisa que chegou a vez). Sempre manual —
+a pessoa confere e aperta enviar dentro do próprio WhatsApp.
+
 ## Serviços reais (extraídos do Salon Soft do cliente)
 
 As durações abaixo são as que o Salon Soft usa hoje — várias estão erradas

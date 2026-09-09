@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { TENANT_ID } from "@/lib/constantes";
@@ -23,7 +23,7 @@ export default function PaginaCaixa() {
   const [erro, setErro] = useState<string | null>(null);
   const [mostrarFormSaida, setMostrarFormSaida] = useState(false);
 
-  async function carregar() {
+  const carregar = useCallback(async () => {
     const { data: linhas, error } = await supabase
       .from("lancamento")
       .select("id, tipo, valor_centavos, descricao, data")
@@ -36,12 +36,12 @@ export default function PaginaCaixa() {
       return;
     }
     setLista(linhas);
-  }
+  }, [data]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps -- busca ao trocar de dia; "carregar" não precisa entrar na lista, ela não muda entre renders de um jeito que importe aqui
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- busca ao trocar de dia
     if (pronto && ehDono) carregar();
-  }, [pronto, ehDono, data]);
+  }, [pronto, ehDono, carregar]);
 
   if (!pronto) return <p className="p-6 text-texto-secundario">Carregando...</p>;
 

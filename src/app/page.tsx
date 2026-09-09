@@ -58,6 +58,7 @@ export default function Home() {
           <>
             <CartaoAtalho href="/caixa" titulo="Caixa" />
             <CartaoAtalho href="/fechamento" titulo="Fechamento do dia" />
+            <CartaoAtalho href="/mensagens" titulo="Mensagens prontas" />
             <CartaoAtalho href="/usuarios" titulo="Acessos da equipe" />
           </>
         )}

@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { TENANT_ID } from "@/lib/constantes";
@@ -16,6 +16,7 @@ import {
 } from "@/lib/data-sp";
 import { calcularHorariosLivres, agruparPorPeriodo, minutosParaHora } from "@/lib/horarios";
 import { centavosParaReais } from "@/lib/dinheiro";
+import { linkWhatsApp, preencherModelo } from "@/lib/whatsapp";
 
 type Profissional = {
   id: string;
@@ -25,6 +26,14 @@ type Profissional = {
 };
 type Servico = { id: string; nome: string; duracao_minutos: number; preco_centavos: number };
 type Cliente = { id: string; nome: string; telefone: string };
+type ModeloMensagem = { id: string; titulo: string; texto: string };
+
+type AgendamentoCriado = {
+  nomeCliente: string;
+  telefoneCliente: string;
+  nomeProfissional: string;
+  horario: string;
+};
 
 export default function PaginaNovoAgendamento() {
   return (
@@ -36,7 +45,6 @@ export default function PaginaNovoAgendamento() {
 
 function FormularioNovoAgendamento() {
   const { pronto, perfil, ehDono } = useExigirLogin();
-  const router = useRouter();
   const parametros = useSearchParams();
 
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
@@ -59,11 +67,15 @@ function FormularioNovoAgendamento() {
   const [clienteSelecionado, setClienteSelecionado] = useState<Cliente | null>(null);
   const [nomeNovoCliente, setNomeNovoCliente] = useState("");
 
+  const [modelos, setModelos] = useState<ModeloMensagem[]>([]);
+  const [modeloId, setModeloId] = useState("");
+  const [criado, setCriado] = useState<AgendamentoCriado | null>(null);
+
   useEffect(() => {
     if (!pronto) return;
      
     (async () => {
-      const [resProf, resServ] = await Promise.all([
+      const [resProf, resServ, resModelos] = await Promise.all([
         supabase
           .from("profissional")
           .select("id, nome, horario_abertura, horario_fechamento")
@@ -74,7 +86,16 @@ function FormularioNovoAgendamento() {
           .select("id, nome, duracao_minutos, preco_centavos")
           .eq("ativo", true)
           .order("nome"),
+        supabase
+          .from("modelo_mensagem")
+          .select("id, titulo, texto")
+          .eq("ativo", true)
+          .order("titulo"),
       ]);
+      if (resModelos.data) {
+        setModelos(resModelos.data);
+        setModeloId(resModelos.data[0]?.id ?? "");
+      }
       if (resProf.data) {
         // Um profissional comum só marca horário na própria cadeira —
         // dono e recepção continuam vendo todo mundo, porque marcam pra
@@ -192,7 +213,12 @@ function FormularioNovoAgendamento() {
       });
       if (erroAgendamento) throw erroAgendamento;
 
-      router.push(`/agenda?data=${data}`);
+      setCriado({
+        nomeCliente: clienteSelecionado?.nome ?? nomeNovoCliente,
+        telefoneCliente: buscaCliente,
+        nomeProfissional: profissional?.nome ?? "",
+        horario: `${minutosParaHora(minutoEscolhido as number)} de ${data.split("-").reverse().join("/")}`,
+      });
     } catch (e) {
       setErro(e instanceof Error ? e.message : "Não deu certo, tenta de novo.");
     } finally {
@@ -200,7 +226,65 @@ function FormularioNovoAgendamento() {
     }
   }
 
+  async function mandarConfirmacao() {
+    const modelo = modelos.find((m) => m.id === modeloId);
+    if (!modelo || !criado) return;
+
+    const texto = preencherModelo(modelo.texto, {
+      cliente: criado.nomeCliente,
+      horario: criado.horario,
+      profissional: criado.nomeProfissional,
+    });
+
+    window.open(linkWhatsApp(criado.telefoneCliente, texto), "_blank", "noopener");
+
+    await supabase.from("mensagem_enviada").insert({
+      tenant_id: TENANT_ID,
+      modelo_mensagem_id: modelo.id,
+      destinatario_telefone: criado.telefoneCliente,
+    });
+  }
+
   if (!pronto) return <p className="p-6 text-texto-secundario">Carregando...</p>;
+
+  if (criado) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
+        <h1 className="titulo-marca text-2xl text-dourado">Agendado!</h1>
+        <div className="divisoria-metalica w-24" />
+        <p className="max-w-xs text-texto-secundario">
+          {criado.nomeCliente} · {criado.horario} com {criado.nomeProfissional}
+        </p>
+
+        {modelos.length > 0 && (
+          <div className="flex w-full max-w-xs flex-col gap-3">
+            <select
+              value={modeloId}
+              onChange={(e) => setModeloId(e.target.value)}
+              className="rounded-lg border border-dourado-escuro bg-cartao px-4 py-3 text-base text-texto-principal outline-none focus-visible:ring-2 focus-visible:ring-dourado"
+            >
+              {modelos.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.titulo}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={mandarConfirmacao}
+              className="rounded-lg bg-entrada py-3 font-bold text-fundo"
+            >
+              Mandar confirmação no WhatsApp
+            </button>
+          </div>
+        )}
+
+        <Link href={`/agenda?data=${data}`} className="text-dourado underline">
+          Voltar pra agenda
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-1 flex-col gap-6 px-6 py-8">

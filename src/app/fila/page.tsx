@@ -5,6 +5,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { TENANT_ID } from "@/lib/constantes";
 import { useExigirLogin } from "@/lib/usar-exigir-login";
+import { linkWhatsApp, preencherModelo } from "@/lib/whatsapp";
 
 type StatusFila = "esperando" | "chamado" | "atendido" | "desistiu";
 
@@ -15,12 +16,14 @@ type ItemFila = {
   entrou_em: string;
   nome_profissional: string;
   nome_cliente: string;
+  telefone_cliente: string;
   nome_servico: string | null;
 };
 
 type Profissional = { id: string; nome: string };
 type Servico = { id: string; nome: string };
 type Cliente = { id: string; nome: string; telefone: string };
+type ModeloMensagem = { id: string; titulo: string; texto: string };
 
 export default function PaginaFila() {
   const { pronto } = useExigirLogin();
@@ -29,13 +32,14 @@ export default function PaginaFila() {
   const [servicos, setServicos] = useState<Servico[]>([]);
   const [erro, setErro] = useState<string | null>(null);
   const [mostrarForm, setMostrarForm] = useState(false);
+  const [modelos, setModelos] = useState<ModeloMensagem[]>([]);
 
   async function carregar() {
     const { data, error } = await supabase
       .from("fila")
       .select(
         "id, profissional_id, status, entrou_em, " +
-          "profissional:profissional_id(nome), cliente:cliente_id(nome), servico:servico_id(nome)",
+          "profissional:profissional_id(nome), cliente:cliente_id(nome, telefone), servico:servico_id(nome)",
       )
       .in("status", ["esperando", "chamado"])
       .order("entrou_em");
@@ -53,7 +57,7 @@ export default function PaginaFila() {
           status: StatusFila;
           entrou_em: string;
           profissional: { nome: string } | { nome: string }[] | null;
-          cliente: { nome: string } | { nome: string }[] | null;
+          cliente: { nome: string; telefone: string } | { nome: string; telefone: string }[] | null;
           servico: { nome: string } | { nome: string }[] | null;
         };
         const um = <T,>(v: T | T[] | null) => (Array.isArray(v) ? v[0] : v);
@@ -64,6 +68,7 @@ export default function PaginaFila() {
           entrou_em: linhaAny.entrou_em,
           nome_profissional: um(linhaAny.profissional)?.nome ?? "Qualquer profissional",
           nome_cliente: um(linhaAny.cliente)?.nome ?? "Cliente",
+          telefone_cliente: um(linhaAny.cliente)?.telefone ?? "",
           nome_servico: um(linhaAny.servico)?.nome ?? null,
         };
       }),
@@ -75,14 +80,30 @@ export default function PaginaFila() {
 
     (async () => {
       await carregar();
-      const [resProf, resServ] = await Promise.all([
+      const [resProf, resServ, resModelos] = await Promise.all([
         supabase.from("profissional").select("id, nome").eq("ativo", true).order("nome"),
         supabase.from("servico").select("id, nome").eq("ativo", true).order("nome"),
+        supabase.from("modelo_mensagem").select("id, titulo, texto").eq("ativo", true),
       ]);
       if (resProf.data) setProfissionais(resProf.data);
       if (resServ.data) setServicos(resServ.data);
+      if (resModelos.data) setModelos(resModelos.data);
     })();
   }, [pronto]);
+
+  // Tenta achar um modelo pensado pra fila; se não tiver nenhum com esse
+  // nome, usa o primeiro modelo ativo que existir.
+  const modeloDaFila =
+    modelos.find((m) => m.titulo.toLowerCase().includes("fila")) ?? modelos[0];
+
+  function avisarNoWhatsApp(item: ItemFila) {
+    if (!modeloDaFila || !item.telefone_cliente) return;
+    const texto = preencherModelo(modeloDaFila.texto, {
+      cliente: item.nome_cliente,
+      profissional: item.nome_profissional,
+    });
+    window.open(linkWhatsApp(item.telefone_cliente, texto), "_blank", "noopener");
+  }
 
   async function mudarStatus(id: string, status: StatusFila) {
     const { error } = await supabase.from("fila").update({ status }).eq("id", id);
@@ -119,7 +140,7 @@ export default function PaginaFila() {
                   {item.status === "chamado" && " · chamado"}
                 </p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap justify-end gap-2">
                 {item.status === "esperando" && (
                   <button
                     type="button"
@@ -127,6 +148,15 @@ export default function PaginaFila() {
                     className="rounded-lg bg-dourado px-3 py-2 text-xs font-bold text-fundo"
                   >
                     Chamar
+                  </button>
+                )}
+                {modeloDaFila && item.telefone_cliente && (
+                  <button
+                    type="button"
+                    onClick={() => avisarNoWhatsApp(item)}
+                    className="rounded-lg border border-entrada px-3 py-2 text-xs font-bold text-entrada"
+                  >
+                    Avisar no WhatsApp
                   </button>
                 )}
                 <button
