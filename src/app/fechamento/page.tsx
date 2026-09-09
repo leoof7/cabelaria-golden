@@ -44,7 +44,7 @@ export default function PaginaFechamento() {
         .from("atendimento")
         .select(
           "id, profissional_id, valor_pago_centavos, forma_pagamento, " +
-            "profissional:profissional_id(nome)",
+            "nome_profissional:profissional_id(nome)",
         )
         .gte("data", inicioDoDiaUTC(data))
         .lte("data", fimDoDiaUTC(data))

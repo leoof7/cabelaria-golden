@@ -6,7 +6,17 @@ export function centavosParaReais(centavos: number): string {
 }
 
 export function reaisParaCentavos(reaisTexto: string): number {
-  const normalizado = reaisTexto.replace(",", ".").trim();
+  let normalizado = reaisTexto.trim();
+
+  // Se tem vírgula E ponto, o ponto é separador de milhar (ex: "1.234,56")
+  // — remove os pontos e usa a vírgula como decimal. Se só tem vírgula, ela
+  // é o decimal. Se só tem ponto, trata como decimal (formato "45.00").
+  if (normalizado.includes(",") && normalizado.includes(".")) {
+    normalizado = normalizado.replace(/\./g, "").replace(",", ".");
+  } else {
+    normalizado = normalizado.replace(",", ".");
+  }
+
   const valor = Number(normalizado);
   return Math.round((Number.isFinite(valor) ? valor : 0) * 100);
 }

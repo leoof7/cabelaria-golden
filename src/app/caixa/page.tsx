@@ -39,7 +39,7 @@ export default function PaginaCaixa() {
   }
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- busca ao trocar de dia
+    // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps -- busca ao trocar de dia; "carregar" não precisa entrar na lista, ela não muda entre renders de um jeito que importe aqui
     if (pronto && ehDono) carregar();
   }, [pronto, ehDono, data]);
 

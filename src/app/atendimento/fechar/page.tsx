@@ -46,9 +46,11 @@ export default function PaginaFecharAtendimento() {
 }
 
 function FormularioFecharAtendimento() {
-  const { pronto } = useExigirLogin();
+  const { pronto, perfil, ehDono } = useExigirLogin();
   const router = useRouter();
-  const agendamentoId = useSearchParams().get("agendamento");
+  const parametros = useSearchParams();
+  const agendamentoId = parametros.get("agendamento");
+  const dataDaAgenda = parametros.get("data");
 
   const [detalhe, setDetalhe] = useState<AgendamentoDetalhe | null>(null);
   const [erro, setErro] = useState<string | null>(null);
@@ -140,7 +142,7 @@ function FormularioFecharAtendimento() {
         .eq("id", detalhe.id);
       if (erroAgendamento) throw erroAgendamento;
 
-      router.push("/agenda");
+      router.push(dataDaAgenda ? `/agenda?data=${dataDaAgenda}` : "/agenda");
     } catch (e) {
       setErro(e instanceof Error ? e.message : "Não deu certo, tenta de novo.");
     } finally {
@@ -156,6 +158,20 @@ function FormularioFecharAtendimento() {
         </Link>
         {erro && <p className="text-alerta">{erro}</p>}
         {!erro && <p className="text-texto-secundario">Carregando...</p>}
+      </div>
+    );
+  }
+
+  if (!ehDono && perfil?.profissional_id !== detalhe.profissional_id) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
+        <p className="text-texto-secundario">
+          Esse atendimento é de outro profissional — só quem atendeu (ou o
+          dono) pode fechar.
+        </p>
+        <Link href="/agenda" className="text-dourado underline">
+          Voltar pra agenda
+        </Link>
       </div>
     );
   }

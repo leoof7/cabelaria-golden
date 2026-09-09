@@ -35,7 +35,7 @@ export default function PaginaNovoAgendamento() {
 }
 
 function FormularioNovoAgendamento() {
-  const { pronto } = useExigirLogin();
+  const { pronto, perfil, ehDono } = useExigirLogin();
   const router = useRouter();
   const parametros = useSearchParams();
 
@@ -75,10 +75,23 @@ function FormularioNovoAgendamento() {
           .eq("ativo", true)
           .order("nome"),
       ]);
-      if (resProf.data) setProfissionais(resProf.data);
+      if (resProf.data) {
+        // Um profissional comum só marca horário na própria cadeira —
+        // dono e recepção continuam vendo todo mundo, porque marcam pra
+        // qualquer um. Sem esse filtro, a pessoa escolhia um colega e só
+        // descobria que não podia na hora de salvar (erro de permissão).
+        const listaVisivel =
+          ehDono || perfil?.papel === "recepcao"
+            ? resProf.data
+            : resProf.data.filter((p) => p.id === perfil?.profissional_id);
+        setProfissionais(listaVisivel);
+        if (!ehDono && perfil?.papel !== "recepcao" && listaVisivel.length === 1) {
+          setProfissionalId(listaVisivel[0].id);
+        }
+      }
       if (resServ.data) setServicos(resServ.data);
     })();
-  }, [pronto]);
+  }, [pronto, ehDono, perfil?.papel, perfil?.profissional_id]);
 
   // Recarrega os horários já ocupados sempre que trocar profissional/data.
   useEffect(() => {
@@ -153,9 +166,15 @@ function FormularioNovoAgendamento() {
       let clienteId = clienteSelecionado?.id;
 
       if (!clienteId) {
+        // upsert por telefone: se a pessoa digitou o telefone de alguém já
+        // cadastrado sem esperar a busca achar, isso acha em vez de tentar
+        // duplicar e quebrar no telefone único.
         const { data: novoCliente, error: erroCliente } = await supabase
           .from("cliente")
-          .insert({ tenant_id: TENANT_ID, nome: nomeNovoCliente, telefone: buscaCliente })
+          .upsert(
+            { tenant_id: TENANT_ID, nome: nomeNovoCliente, telefone: buscaCliente },
+            { onConflict: "tenant_id,telefone" },
+          )
           .select("id")
           .single();
         if (erroCliente) throw erroCliente;

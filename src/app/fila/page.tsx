@@ -213,9 +213,14 @@ function FormEntrarNaFila({
     try {
       let clienteId = clienteSelecionado?.id;
       if (!clienteId) {
+        // upsert por telefone — evita duplicar se a busca não tiver achado
+        // a tempo (mesmo raciocínio do novo agendamento).
         const { data: novo, error } = await supabase
           .from("cliente")
-          .insert({ tenant_id: TENANT_ID, nome: nomeNovoCliente, telefone: busca })
+          .upsert(
+            { tenant_id: TENANT_ID, nome: nomeNovoCliente, telefone: busca },
+            { onConflict: "tenant_id,telefone" },
+          )
           .select("id")
           .single();
         if (error) throw error;

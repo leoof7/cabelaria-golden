@@ -126,6 +126,33 @@ dinheiro que cada profissional recebe, então não é o tipo de coisa pra
 chutar um padrão e seguir — vale esperar a resposta dele antes de
 construir.
 
+### ADR-005 — Revisão de bugs antes do banco entrar (2026-09-09)
+
+Passada uma revisão linha a linha em todo o código (sem banco real pra
+testar de ponta a ponta, então essa foi a forma de garantir qualidade
+possível nesse momento). Achados e corrigidos:
+
+- **RLS**: desativar um profissional/serviço/modelo de mensagem fazia ele
+  sumir até da tela de gerenciar (RLS só liberava ver quem estava ativo,
+  pra todo mundo). Corrigido: quem está logado vê tudo, ativo ou não;
+  anônimo (página pública) continua só vendo ativo.
+- **Fechamento do dia**: nome do profissional nunca aparecia (o campo do
+  banco tinha um nome e o código lia outro).
+- **Permissão silenciosa**: um profissional conseguia tentar fechar
+  atendimento de colega ou marcar horário na agenda de colega, e só
+  descobria que não podia num erro feio na hora de salvar. Agora nem
+  aparece a opção pra quem não pode.
+- **Grade de horário**: se o horário de abertura de alguém não fosse
+  múltiplo de 15 (ex: "09:10"), a grade toda saía do :00/:15/:30/:45.
+  Corrigido pra sempre arredondar pra cima.
+- **Duplicidade de cliente**: telefone digitado rápido demais (antes da
+  busca achar) podia tentar criar cliente duplicado e travar com erro.
+  Trocado por "achar ou criar" (upsert) nas telas internas.
+- **Fuso horário**: a página pública calculava "já passou da hora" com o
+  relógio do aparelho de quem acessa, não o de São Paulo.
+- Um `data` de volta pra tela errada depois de fechar atendimento — agora
+  volta pro dia que a pessoa estava vendo, não sempre "hoje".
+
 ## Serviços reais (extraídos do Salon Soft do cliente)
 
 As durações abaixo são as que o Salon Soft usa hoje — várias estão erradas

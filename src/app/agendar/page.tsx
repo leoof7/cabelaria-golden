@@ -87,7 +87,7 @@ export default function PaginaAgendarPublico() {
 
   const horariosLivres = useMemo(() => {
     if (!profissional || !servico) return { manha: [], tarde: [], noite: [] };
-    const agoraMin = data === hojeSP() ? new Date().getHours() * 60 + new Date().getMinutes() : 0;
+    const agoraMin = data === hojeSP() ? minutosDoDiaSP(new Date().toISOString()) : 0;
     const livres = calcularHorariosLivres(
       Math.max(minutosDoHorario(profissional.horario_abertura), agoraMin),
       minutosDoHorario(profissional.horario_fechamento),

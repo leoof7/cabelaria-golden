@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useExigirLogin } from "@/lib/usar-exigir-login";
 import {
@@ -35,8 +36,17 @@ type Agendamento = {
 };
 
 export default function PaginaAgenda() {
-  const { pronto } = useExigirLogin();
-  const [data, setData] = useState(hojeSP());
+  return (
+    <Suspense fallback={<p className="p-6 text-texto-secundario">Carregando...</p>}>
+      <ConteudoAgenda />
+    </Suspense>
+  );
+}
+
+function ConteudoAgenda() {
+  const { pronto, perfil, ehDono } = useExigirLogin();
+  const dataInicial = useSearchParams().get("data");
+  const [data, setData] = useState(dataInicial ?? hojeSP());
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
   const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
   const [nomesCliente, setNomesCliente] = useState<Record<string, string>>({});
@@ -163,6 +173,8 @@ export default function PaginaAgenda() {
               agendamentos={agendamentos.filter((a) => a.profissional_id === prof.id)}
               nomesCliente={nomesCliente}
               nomesServico={nomesServico}
+              podeFechar={ehDono || perfil?.profissional_id === prof.id}
+              data={data}
             />
           ))}
         </div>
@@ -176,11 +188,15 @@ function ColunaProfissional({
   agendamentos,
   nomesCliente,
   nomesServico,
+  podeFechar,
+  data,
 }: {
   profissional: Profissional;
   agendamentos: Agendamento[];
   nomesCliente: Record<string, string>;
   nomesServico: Record<string, string>;
+  podeFechar: boolean;
+  data: string;
 }) {
   const inicioMin = minutosDoHorario(profissional.horario_abertura);
   const fimMin = minutosDoHorario(profissional.horario_fechamento);
@@ -242,7 +258,7 @@ function ColunaProfissional({
             </>
           );
 
-          if (a.status !== "agendado") {
+          if (a.status !== "agendado" || !podeFechar) {
             return (
               <div
                 key={a.id}
@@ -257,7 +273,7 @@ function ColunaProfissional({
           return (
             <Link
               key={a.id}
-              href={`/atendimento/fechar?agendamento=${a.id}`}
+              href={`/atendimento/fechar?agendamento=${a.id}&data=${data}`}
               className={`absolute left-1 right-1 overflow-hidden rounded-md px-2 py-1 text-xs outline-none focus-visible:ring-2 focus-visible:ring-dourado ${corFundo}`}
               style={{ top: topo, height: altura }}
             >

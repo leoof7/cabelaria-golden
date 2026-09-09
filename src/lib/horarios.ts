@@ -16,8 +16,12 @@ export function calcularHorariosLivres(
 ): number[] {
   const livres: number[] = [];
 
+  // A grade sempre cai em :00/:15/:30/:45, mesmo que o horário de abertura
+  // do profissional não seja um múltiplo de 15 (ex: cadastraram "09:10").
+  const inicioGrade = Math.ceil(aberturaMin / PASSO_MINUTOS) * PASSO_MINUTOS;
+
   for (
-    let inicio = aberturaMin;
+    let inicio = inicioGrade;
     inicio + duracaoMinutos <= fechamentoMin;
     inicio += PASSO_MINUTOS
   ) {

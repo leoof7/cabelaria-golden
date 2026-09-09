@@ -410,9 +410,16 @@ create policy "tenant_update_dono" on public.tenant
 
 -- --- profissional ---------------------------------------------------------
 
+-- Anônimo (página pública) só vê quem está ativo. Quem está logado precisa
+-- ver TODO mundo, inclusive inativo — senão o dono desativa um profissional
+-- e ele some da tela de gerenciar, sem jeito de reativar.
 create policy "profissional_select_publico" on public.profissional
-  for select to anon, authenticated
+  for select to anon
   using (ativo = true and tenant_id = public.tenant_padrao_id());
+
+create policy "profissional_select_equipe" on public.profissional
+  for select to authenticated
+  using (tenant_id = public.meu_tenant_id());
 
 create policy "profissional_escreve_dono" on public.profissional
   for insert to authenticated
@@ -449,9 +456,14 @@ create policy "perfil_atualiza_dono" on public.perfil
 
 -- --- servico ----------------------------------------------------------
 
+-- Mesmo raciocínio do profissional: anônimo só vê ativo, equipe vê tudo.
 create policy "servico_select_publico" on public.servico
-  for select to anon, authenticated
+  for select to anon
   using (ativo = true and tenant_id = public.tenant_padrao_id());
+
+create policy "servico_select_equipe" on public.servico
+  for select to authenticated
+  using (tenant_id = public.meu_tenant_id());
 
 create policy "servico_escreve_dono" on public.servico
   for insert to authenticated
@@ -639,9 +651,13 @@ create policy "fila_apaga_dono" on public.fila
 
 -- --- modelo_mensagem --------------------------------------------------
 
+-- Sem filtro de "ativo" aqui — senão o dono desativa um modelo e nem ele
+-- mesmo consegue mais achar pra reativar (mesmo problema de profissional
+-- e serviço, corrigido acima). Quem decide o que mostrar/esconder na tela
+-- é o app, filtrando ativo=true só na lista de USO, não na de gestão.
 create policy "modelo_mensagem_select_equipe" on public.modelo_mensagem
   for select to authenticated
-  using (ativo = true and tenant_id = public.meu_tenant_id());
+  using (tenant_id = public.meu_tenant_id());
 
 create policy "modelo_mensagem_escreve_dono" on public.modelo_mensagem
   for insert to authenticated
