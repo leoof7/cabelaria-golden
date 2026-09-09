@@ -111,13 +111,20 @@ antes de construir.
 8. Página pública
 9. Comissão
 
-Status atual: **itens 1 a 6 construídos** — login individual, acessos da
+Status atual: **itens 1 a 8 construídos** — login individual, acessos da
 equipe, profissionais, serviços, clientes, agenda do dia, novo agendamento,
-fechar atendimento, caixa (entradas/saídas do dia) e fechamento do dia
-(total por forma de pagamento e por profissional). Repositório publicado em
+fechar atendimento, caixa, fechamento do dia, fila de espera e a página
+pública de agendamento (`/agendar`, sem login, com horários por período e
+botão de fila quando não há vaga). Repositório publicado em
 https://github.com/leoof7/cabelaria-golden. Ainda **não testado com banco
-de dados real** (falta o projeto Supabase — ver `PENDENCIAS.md`). Em
-andamento: **item 7, fila de espera**.
+de dados real** (falta o projeto Supabase — ver `PENDENCIAS.md`).
+
+**Item 9 (comissão) propositalmente não iniciado**: depende da regra que o
+Leo ainda não passou (percentual? aluguel de cadeira? — ver
+`PENDENCIAS.md`). Diferente das outras pendências, essa mexe direto no
+dinheiro que cada profissional recebe, então não é o tipo de coisa pra
+chutar um padrão e seguir — vale esperar a resposta dele antes de
+construir.
 
 ## Serviços reais (extraídos do Salon Soft do cliente)
 
@@ -188,6 +195,17 @@ abrir no celular pela rede wi-fi vai junto com o aviso.
 - Mensagens prontas (tabela `modelo_mensagem`) + botão que abre o WhatsApp
   com o texto preenchido (link `wa.me`), sem integração paga. Funciona
   igual em navegador de computador e de celular.
+
+### ADR-004 — Função para cliente se cadastrar sozinho na página pública (2026-09-09)
+
+- Problema: quem acessa a página pública de agendamento não está logado,
+  então (por privacidade) não pode enxergar a tabela de clientes — mas
+  também não pode criar um cadastro novo a cada visita, senão vira cliente
+  duplicado toda vez.
+- Solução: função no banco (`cliente_upsert_publico`) que roda com
+  privilégio elevado só para achar-ou-criar o cliente pelo telefone, e
+  devolve apenas o id — nada mais da tabela fica visível pra quem não está
+  logado. Ver `supabase/schema.sql`.
 
 ### ADR-003 — Terceiro papel de acesso: recepção (2026-09-09)
 

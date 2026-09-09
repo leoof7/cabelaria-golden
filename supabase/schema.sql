@@ -221,6 +221,34 @@ create table public.agendamento (
 create index agendamento_profissional_horario_idx
   on public.agendamento (profissional_id, data_hora_inicio);
 
+-- Página pública de agendamento: a pessoa não está logada, então não pode
+-- ENXERGAR a tabela cliente (privacidade — não dá pra listar telefone de
+-- ninguém). Mas também não pode criar um cadastro novo toda vez que
+-- agenda, senão vira cliente duplicado a cada visita. Essa função resolve
+-- os dois lados: roda com privilégio elevado (SECURITY DEFINER) só para
+-- achar-ou-criar pelo telefone, e devolve apenas o id — nada mais da
+-- tabela cliente fica visível pra quem não está logado.
+create or replace function public.cliente_upsert_publico(p_nome text, p_telefone text)
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_id uuid;
+begin
+  insert into public.cliente (tenant_id, nome, telefone)
+  values (public.tenant_padrao_id(), p_nome, p_telefone)
+  on conflict (tenant_id, telefone)
+  do update set nome = excluded.nome
+  returning id into v_id;
+
+  return v_id;
+end;
+$$;
+
+grant execute on function public.cliente_upsert_publico(text, text) to anon, authenticated;
+
 -- ----------------------------------------------------------------------------
 -- 7. ATENDIMENTO — o fechamento em si. Grava tudo que uma regra de
 --    comissão vai precisar no futuro, sem precisar refazer nada.

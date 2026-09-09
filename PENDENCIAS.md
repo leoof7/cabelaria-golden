@@ -32,7 +32,9 @@ de confirmar antes de ir para produção.
 - [ ] Regra de comissão: percentual ou aluguel de cadeira? Igual para todo
       serviço? Produto desconta? Desconto afeta? Periodicidade de
       pagamento?
-- [ ] A página pública deve mostrar preço ou não? (a dele não mostra)
+- [ ] A página pública deve mostrar preço ou não? (a dele não mostra).
+      **Padrão usado por enquanto:** mostra sim, na confirmação do
+      agendamento — fácil de tirar se o Leo preferir esconder.
 - [ ] Atende mulher e criança? A logo diz UNISEX & INFANTIL e a lista tem
       química, mas ele falou que é masculino.
 - [ ] Horário de funcionamento do salão e de cada profissional — padrão
