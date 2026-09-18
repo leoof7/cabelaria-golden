@@ -50,6 +50,17 @@ entra sem uma frase explicando por que o projeto não fica de pé sem ela.
 Um projeto Supabase só, dados descartáveis até a produção (aí limpamos e
 recomeçamos com dado real).
 
+**Situação em 17/09/2026:** o banco foi recriado do zero, com o nome
+"Cabelaria Golden", na região de São Paulo. Ele está **vazio**: o
+`supabase/schema.sql` ainda não foi rodado e o app ainda não tem o
+`.env.local` com o endereço e a chave pública. Enquanto isso não for feito,
+o sistema compila mas não abre com dado. A senha do banco foi gerada na
+criação e guardada pelo Leandro fora do projeto.
+
+Duas opções ficaram marcadas na criação do projeto: a API de dados ligada
+(o app depende dela) e a trava de segurança automática, que liga RLS em
+toda tabela nova.
+
 - `tenant_id` em toda tabela, mesmo com um cliente só
 - RLS ligado e forçado em todas as tabelas
 - Dinheiro em centavos, inteiro, nunca decimal
